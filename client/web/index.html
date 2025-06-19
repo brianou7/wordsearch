@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Sopa de Letras</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f0f0f0;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(10, 40px);
+      grid-template-rows: repeat(10, 40px);
+      gap: 3px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .cell {
+      width: 40px;
+      height: 40px;
+      background-color: white;
+      border: 1px solid #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 18px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .highlight {
+      background-color: yellow;
+    }
+
+    #words {
+      margin-top: 10px;
+    }
+
+    #words span {
+      margin: 0 8px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Sopa de letras</h1>
+
+<div id="grid"></div>
+
+<div id="words">
+  Palabras: <span>HTML</span><span>CSS</span><span>JAVASCRIPT</span>
+</div>
+
+<script>
+  const words = ['HTML', 'CSS', 'JAVASCRIPT'];
+  const gridSize = 10;
+  const gridElement = document.getElementById('grid');
+
+  // Crear una matriz vacía
+  let grid = Array.from({ length: gridSize }, () =>
+    Array.from({ length: gridSize }, () => '')
+  );
+
+  // Insertar palabras horizontalmente
+  function placeWords() {
+    words.forEach(word => {
+      let placed = false;
+      while (!placed) {
+        const row = Math.floor(Math.random() * gridSize);
+        const col = Math.floor(Math.random() * (gridSize - word.length));
+        let fits = true;
+
+        for (let i = 0; i < word.length; i++) {
+          if (grid[row][col + i] !== '' && grid[row][col + i] !== word[i]) {
+            fits = false;
+            break;
+          }
+        }
+
+        if (fits) {
+          for (let i = 0; i < word.length; i++) {
+            grid[row][col + i] = word[i];
+          }
+          placed = true;
+        }
+      }
+    });
+  }
+
+  // Rellenar espacios vacíos con letras aleatorias
+  function fillGrid() {
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    for (let row = 0; row < gridSize; row++) {
+      for (let col = 0; col < gridSize; col++) {
+        if (grid[row][col] === '') {
+          grid[row][col] = letters[Math.floor(Math.random() * letters.length)];
+        }
+      }
+    }
+  }
+
+  // Mostrar la sopa de letras en HTML
+  function drawGrid() {
+    gridElement.innerHTML = '';
+    grid.forEach((row, rowIndex) => {
+      row.forEach((letter, colIndex) => {
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.textContent = letter;
+        cell.dataset.row = rowIndex;
+        cell.dataset.col = colIndex;
+        cell.addEventListener('click', () => {
+          cell.classList.toggle('highlight');
+        });
+        gridElement.appendChild(cell);
+      });
+    });
+  }
+
+    const socket = new WebSocket('ws://localhost:8765/start');
+
+    socket.addEventListener('open', () => {
+        console.log('WebSocket connected');
+    });
+
+    socket.addEventListener('message', event => {
+        console.log('Received:', event.data);
+    });
+
+    socket.addEventListener('close', () => {
+        console.log('WebSocket disconnected');
+    });
+
+    socket.addEventListener('error', error => {
+        console.error('WebSocket error:', error);
+    });
+
+  // Inicializar
+  placeWords();
+  fillGrid();
+  drawGrid();
+</script>
+
+</body>
+</html>
